@@ -1259,16 +1259,19 @@
 					return false;
 				}
 				try {
-					const res = await fetch(`${cfg.url}/api/v1/ingest`, {
+					const res = await fetch("/proxy/ingest", {
+						// ← call your own server
 						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: authHeader(cfg.user, cfg.pass),
-							"X-P-Stream": cfg.stream,
-						},
-						body: JSON.stringify(entries),
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							parseableUrl: cfg.url,
+							auth: "Basic " + btoa(cfg.user + ":" + cfg.pass),
+							stream: cfg.stream,
+							logs: entries,
+						}),
 					});
-					return res.ok;
+					const data = await res.json();
+					return data.ok;
 				} catch (e) {
 					return false;
 				}
